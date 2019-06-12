@@ -1,8 +1,13 @@
 package com.why.security.browser;
 
+import com.why.security.core.properties.SecurityProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * ClassName: BrowserSecurityConfig
@@ -15,13 +20,34 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  */
 @Configuration
 public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private SecurityProperties securityProperties;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http.formLogin()
-        http.httpBasic()
+        // TODO HTTP Basic认证
+        // http.httpBasic()
+        // TODO HTTP表单认证
+        http.formLogin()
+                // TODO HTML表单登录
+                // .loginPage("/why-signIn.html")
+                // TODO Controller处理
+                .loginPage("/authentication/require")
+                .loginProcessingUrl("/authentication/form")
                 .and()
                 .authorizeRequests()
+                .antMatchers("/authentication/require",
+                        securityProperties.getBrowser().getLoginPage())
+                .permitAll()
                 .anyRequest()
-                .authenticated();
+                .authenticated()
+                .and()
+                .csrf().disable();
     }
 }

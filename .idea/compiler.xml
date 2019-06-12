@@ -8,8 +8,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="why-security-app" />
         <module name="why-security-core" />
-        <module name="why-security-demo" />
         <module name="why-security-browser" />
+        <module name="why-security-demo" />
       </profile>
     </annotationProcessing>
   </component>
