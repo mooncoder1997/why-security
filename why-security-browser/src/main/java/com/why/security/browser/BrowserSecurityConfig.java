@@ -1,5 +1,7 @@
 package com.why.security.browser;
 
+import com.why.security.browser.authentication.WHYAuthenticationFailHandler;
+import com.why.security.browser.authentication.WHYAuthenticationSuccessHandler;
 import com.why.security.core.properties.SecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +26,12 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private SecurityProperties securityProperties;
 
+    @Autowired
+    private WHYAuthenticationSuccessHandler whyAuthenticationSuccessHandler;
+
+    @Autowired
+    private WHYAuthenticationFailHandler whyAuthenticationFailHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -40,10 +48,13 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
                 // TODO Controller处理
                 .loginPage("/authentication/require")
                 .loginProcessingUrl("/authentication/form")
+                .successHandler(whyAuthenticationSuccessHandler)
+                .failureHandler(whyAuthenticationFailHandler)
                 .and()
                 .authorizeRequests()
                 .antMatchers("/authentication/require",
-                        securityProperties.getBrowser().getLoginPage())
+                        securityProperties.getBrowser().getLoginPage(),
+                        "/code/image")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
