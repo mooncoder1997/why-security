@@ -3,6 +3,7 @@ package com.why.security.browser;
 import com.why.security.browser.authentication.WHYAuthenticationFailHandler;
 import com.why.security.browser.authentication.WHYAuthenticationSuccessHandler;
 import com.why.security.core.properties.SecurityProperties;
+import com.why.security.core.validate.code.ValidateCodeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * ClassName: BrowserSecurityConfig
@@ -39,10 +41,15 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
+        validateCodeFilter.setAuthenticationFailureHandler(whyAuthenticationFailHandler);
+        validateCodeFilter.setSecurityProperties(securityProperties);
+        validateCodeFilter.afterPropertiesSet();
         // TODO HTTP Basic认证
         // http.httpBasic()
         // TODO HTTP表单认证
-        http.formLogin()
+        http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin()
                 // TODO HTML表单登录
                 // .loginPage("/why-signIn.html")
                 // TODO Controller处理

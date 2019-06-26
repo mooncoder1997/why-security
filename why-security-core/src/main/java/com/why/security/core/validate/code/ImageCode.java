@@ -32,6 +32,10 @@ public class ImageCode {
         this.expireTime = expireTime;
     }
 
+    public boolean isExpried() {
+        return LocalDateTime.now().isAfter(expireTime);
+    }
+
     public BufferedImage getImage() {
         return image;
     }
