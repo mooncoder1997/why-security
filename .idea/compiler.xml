@@ -6,10 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="why-security-app" />
         <module name="why-security-core" />
-        <module name="why-security-browser" />
         <module name="why-security-demo" />
+        <module name="why-security-browser" />
+        <module name="why-security-app" />
       </profile>
     </annotationProcessing>
   </component>

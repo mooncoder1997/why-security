@@ -3,6 +3,7 @@ package com.why.security.browser;
 import com.why.security.browser.authentication.WHYAuthenticationFailHandler;
 import com.why.security.browser.authentication.WHYAuthenticationSuccessHandler;
 import com.why.security.core.properties.SecurityProperties;
+import com.why.security.core.validate.code.SmsCodeFilter;
 import com.why.security.core.validate.code.ValidateCodeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -64,10 +65,17 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
         validateCodeFilter.setAuthenticationFailureHandler(whyAuthenticationFailHandler);
         validateCodeFilter.setSecurityProperties(securityProperties);
         validateCodeFilter.afterPropertiesSet();
+
+        SmsCodeFilter smsCodeFilter = new SmsCodeFilter();
+        smsCodeFilter.setAuthenticationFailureHandler(whyAuthenticationFailHandler);
+        smsCodeFilter.setSecurityProperties(securityProperties);
+        smsCodeFilter.afterPropertiesSet();
+
         // TODO HTTP Basic认证
         // http.httpBasic()
         // TODO HTTP表单认证
-        http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
+        http.addFilterBefore(smsCodeFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin()
                 // TODO HTML表单登录
                 // .loginPage("/why-signIn.html")
@@ -85,7 +93,7 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/authentication/require",
                         securityProperties.getBrowser().getLoginPage(),
-                        "/code/image")
+                        "/code/*")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
