@@ -1,5 +1,6 @@
 package com.why.security.core.authentication.mobile;
 
+import com.why.security.core.properties.SecurityConstants;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -20,28 +21,26 @@ import javax.servlet.http.HttpServletResponse;
  * @since JDK 1.8
  */
 public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    public static final String WHY_FORM_MOBILE_KEY = "mobile";
 
-    private String mobileParameter = WHY_FORM_MOBILE_KEY;
+    private String mobileParameter = SecurityConstants.DEFAULT_PARAMETER_NAME_MOBILE;
     private boolean postOnly = true;
 
     public SmsCodeAuthenticationFilter() {
-        super(new AntPathRequestMatcher("/authentication/mobile", "POST"));
+        super(new AntPathRequestMatcher(SecurityConstants.DEFAULT_LOGIN_PROCESSING_URL_MOBILE, "POST"));
     }
 
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         if (this.postOnly && !request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
-        } else {
-            String mobile = obtainMobile(request);
-            if (mobile == null) {
-                mobile = "";
-            }
-            mobile = mobile.trim();
-            SmsCodeAuthenticationToken authRequest = new SmsCodeAuthenticationToken(mobile);
-            setDetails(request, authRequest);
-            return this.getAuthenticationManager().authenticate(authRequest);
         }
+        String mobile = obtainMobile(request);
+        if (mobile == null) {
+            mobile = "";
+        }
+        mobile = mobile.trim();
+        SmsCodeAuthenticationToken authRequest = new SmsCodeAuthenticationToken(mobile);
+        setDetails(request, authRequest);
+        return this.getAuthenticationManager().authenticate(authRequest);
     }
 
     /**

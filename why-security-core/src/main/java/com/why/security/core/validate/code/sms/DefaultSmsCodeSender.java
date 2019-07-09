@@ -1,5 +1,7 @@
 package com.why.security.core.validate.code.sms;
 
+import org.springframework.stereotype.Component;
+
 /**
  * ClassName: DefaultSmsCodeSender
  * Description: TODO
@@ -9,6 +11,7 @@ package com.why.security.core.validate.code.sms;
  * @version V1.0
  * @since JDK 1.8
  */
+@Component("smsCodeSender")
 public class DefaultSmsCodeSender implements SmsCodeSender {
     @Override
     public void send(String mobile, String code) {

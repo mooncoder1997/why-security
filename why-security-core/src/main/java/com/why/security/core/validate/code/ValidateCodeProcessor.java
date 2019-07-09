@@ -1,5 +1,6 @@
 package com.why.security.core.validate.code;
 
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
@@ -22,4 +23,10 @@ public interface ValidateCodeProcessor {
      * @throws Exception
      */
     void create(ServletWebRequest request) throws Exception;
+
+    /**
+     * 校验验证码
+     * @param servletWebRequest
+     */
+    void validate(ServletWebRequest servletWebRequest) throws ServletRequestBindingException;
 }

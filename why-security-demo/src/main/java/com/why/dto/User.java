@@ -2,6 +2,7 @@ package com.why.dto;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.why.validator.MyConstraint;
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.Past;
@@ -24,6 +25,7 @@ public class User {
     private String id;
 
     @MyConstraint(message = "这是一个测试")
+    @ApiModelProperty(value = "用户名")
     private String username;
 
     @NotBlank(message = "密码不能为空")
@@ -50,11 +52,11 @@ public class User {
         this.password = password;
     }
 
+    @JsonView(UserSimpleView.class)
     public String getId() {
         return id;
     }
 
-    @JsonView(UserSimpleView.class)
     public void setId(String id) {
         this.id = id;
     }

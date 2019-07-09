@@ -26,7 +26,7 @@ import java.io.IOException;
  * @version V1.0
  * @since JDK 1.8
  */
-@Component
+@Component("whyAuthenticationFailHandler")
 public class WHYAuthenticationFailHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private Logger logger = LoggerFactory.getLogger(getClass());

@@ -24,7 +24,7 @@ import java.io.IOException;
  * @version V1.0
  * @since JDK 1.8
  */
-@Component
+@Component("whyAuthenticationSuccessHandler")
 public class WHYAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private Logger logger = LoggerFactory.getLogger(getClass());

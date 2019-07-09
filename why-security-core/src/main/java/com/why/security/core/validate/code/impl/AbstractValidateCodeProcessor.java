@@ -36,7 +36,7 @@ public abstract class AbstractValidateCodeProcessor<C extends ValidateCode> impl
     }
 
     /**
-     * 盛昌校验码
+     * 生成校验码
      * @param request
      * @return
      */
@@ -52,7 +52,7 @@ public abstract class AbstractValidateCodeProcessor<C extends ValidateCode> impl
      * @param validateCode
      */
     private void save(ServletWebRequest request, C validateCode) {
-        sessionStrategy.setAttribute(request, SESSION_KEY_PREFIX + getProcessorType(request).toUpperCase(), validateCode);
+        sessionStrategy.setAttribute(request, ValidateCodeProcessor.SESSION_KEY_PREFIX + getProcessorType(request).toUpperCase(), validateCode);
     }
 
     /**
@@ -70,5 +70,13 @@ public abstract class AbstractValidateCodeProcessor<C extends ValidateCode> impl
      */
     private String getProcessorType(ServletWebRequest request) {
         return StringUtils.substringAfter(request.getRequest().getRequestURI(), "/code/");
+    }
+
+    public Map<String, ValidateCodeGenerator> getValidateCodeGenerators() {
+        return validateCodeGenerators;
+    }
+
+    public void setValidateCodeGenerators(Map<String, ValidateCodeGenerator> validateCodeGenerators) {
+        this.validateCodeGenerators = validateCodeGenerators;
     }
 }

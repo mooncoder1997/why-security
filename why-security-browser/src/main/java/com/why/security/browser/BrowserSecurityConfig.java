@@ -1,19 +1,17 @@
 package com.why.security.browser;
 
-import com.why.security.browser.authentication.WHYAuthenticationFailHandler;
-import com.why.security.browser.authentication.WHYAuthenticationSuccessHandler;
+import com.why.security.core.authentication.AbstractChannelSecurityConfig;
+import com.why.security.core.authentication.mobile.SmsCodeAuthenticationSecurityConfig;
+import com.why.security.core.properties.SecurityConstants;
 import com.why.security.core.properties.SecurityProperties;
-import com.why.security.core.validate.code.SmsCodeFilter;
-import com.why.security.core.validate.code.ValidateCodeFilter;
+import com.why.security.core.validate.code.ValidateCodeSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
@@ -29,22 +27,49 @@ import javax.sql.DataSource;
  * @since JDK 1.8
  */
 @Configuration
-public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
+public class BrowserSecurityConfig extends AbstractChannelSecurityConfig {
 
     @Autowired
     private SecurityProperties securityProperties;
-
-    @Autowired
-    private WHYAuthenticationSuccessHandler whyAuthenticationSuccessHandler;
-
-    @Autowired
-    private WHYAuthenticationFailHandler whyAuthenticationFailHandler;
 
     @Autowired
     private DataSource dataSource;
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
+
+    @Autowired
+    private ValidateCodeSecurityConfig validateCodeSecurityConfig;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        applyPasswordAuthenticationConfig(http);
+
+        http.apply(validateCodeSecurityConfig)
+                .and()
+                .apply(smsCodeAuthenticationSecurityConfig)
+                .and()
+                .rememberMe()
+                .tokenRepository(persistentTokenRepository())
+                .tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
+                .userDetailsService(userDetailsService)
+                .and()
+                .authorizeRequests()
+                .antMatchers(
+                        SecurityConstants.DEFAULT_UNAUTHENTICATION_URL,
+                        SecurityConstants.DEFAULT_LOGIN_PROCESSING_URL_MOBILE,
+                        securityProperties.getBrowser().getLoginPage(),
+                        SecurityConstants.DEFAULT_VALIDATE_CODE_URL_PREFIX + "/*"
+                )
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .csrf().disable();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -57,47 +82,5 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
         tokenRepository.setDataSource(dataSource);
 //        tokenRepository.setCreateTableOnStartup(true);
         return tokenRepository;
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
-        validateCodeFilter.setAuthenticationFailureHandler(whyAuthenticationFailHandler);
-        validateCodeFilter.setSecurityProperties(securityProperties);
-        validateCodeFilter.afterPropertiesSet();
-
-        SmsCodeFilter smsCodeFilter = new SmsCodeFilter();
-        smsCodeFilter.setAuthenticationFailureHandler(whyAuthenticationFailHandler);
-        smsCodeFilter.setSecurityProperties(securityProperties);
-        smsCodeFilter.afterPropertiesSet();
-
-        // TODO HTTP Basic认证
-        // http.httpBasic()
-        // TODO HTTP表单认证
-        http.addFilterBefore(smsCodeFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
-                .formLogin()
-                // TODO HTML表单登录
-                // .loginPage("/why-signIn.html")
-                // TODO Controller处理
-                .loginPage("/authentication/require")
-                .loginProcessingUrl("/authentication/form")
-                .successHandler(whyAuthenticationSuccessHandler)
-                .failureHandler(whyAuthenticationFailHandler)
-                .and()
-                .rememberMe()
-                .tokenRepository(persistentTokenRepository())
-                .tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
-                .userDetailsService(userDetailsService)
-                .and()
-                .authorizeRequests()
-                .antMatchers("/authentication/require",
-                        securityProperties.getBrowser().getLoginPage(),
-                        "/code/*")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .csrf().disable();
     }
 }
